@@ -18,7 +18,6 @@ function getFirstIpAddress(cidrStr, callback) {
   // Initialize return arguments for callback
   let firstIpAddress = null;
   let callbackError = null;
-  let ipv6Address = null;
 
   // Instantiate an object from the imported class and assign the instance to variable cidr.
   const cidr = new IPCIDR(cidrStr);
@@ -38,22 +37,12 @@ function getFirstIpAddress(cidrStr, callback) {
     // If the passed CIDR is valid, call the object's toArray() method.
     // Notice the destructering assignment syntax to get the value of the first array's element.
     [firstIpAddress] = cidr.toArray(options);
-    ipv6Address = getIpv4MappedIpv6Address(firstIpAddress);
   }
-  object = new Object();
-  if (ipv6Address == null) {
-    object.ipv4 = '\{\"ipv4\":' + firstIpAddress;
-    object.ipv6 = ',\"ipv6\":' + ipv6Address + '\}';
-  } else {
-    object.ipv4 = '\{\"ipv4\":\"' + firstIpAddress + '\"';
-    object.ipv6 = ',\"ipv6\":\"' + ipv6Address + '\"\}';
-  }
-
   // Call the passed callback function.
   // Node.js convention is to pass error data as the first argument to a callback.
   // The IAP convention is to pass returned data as the first argument and error
   // data as the second argument to the callback function.
-  return callback(object, callbackError);
+  return callback(firstIpAddress, callbackError);
 }
 
 /**
@@ -110,7 +99,7 @@ function getIpv4MappedIpv6Address(ipv4) {
 */
 function main() {
   // Create some test data for getFirstIpAddress(), both valid and invalid.
-  let sampleCidrs = [ '172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.10.128/25', '192.168.1.216/30'];
+  let sampleCidrs = ['172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.10.128/25', '192.168.1.216/30'];
   let sampleCidrsLen = sampleCidrs.length;
   // Create some test data for getIpv4MappedIpv6Address, both valid and invalid.
   let sampleIpv4s = [ '172.16.10.1', '172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.256.1', '1.1.1.-1'];
@@ -127,8 +116,7 @@ function main() {
       if (error) {
         console.error(`  Error returned from GET request: ${error}`);
       }
-     // console.log(`  Response returned from GET request: ${data}`);
-      console.log(`  Response returned from GET request: ${data.ipv4}${data.ipv6}`);
+      console.log(`  Response returned from GET request: ${data}`);
     });
   }
   // Iterate over sampleIpv4s and pass the element's value to getIpv4MappedIpv6Address().
